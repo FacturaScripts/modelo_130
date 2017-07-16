@@ -20,6 +20,7 @@
  */
 
 require_model('cuenta_especial.php');
+require_model('config_130.php');
 
 /**
  * Description of modelo130_wizard
@@ -31,6 +32,7 @@ require_model('cuenta_especial.php');
 class modelo130_wizard extends fs_controller
 {
     public $cuenta_especial;
+    public $configuracion;
 
     public function __construct()
     {
@@ -48,83 +50,73 @@ class modelo130_wizard extends fs_controller
         }
 
         $this->cuenta_especial = new cuenta_especial();
+        $this->configuracion = new config_130();
 
         /// Crea cuenta especial para ingresos si no existe
         $cesp = $this->cuenta_especial->get('M130I');
         if (!$cesp) {
             $cesp = new cuenta_especial();
             $cesp->idcuentaesp = 'M130I';
+
+            $cesp->descripcion = "Cuenta especial para calculo de ingresos del modelo 130";
+
+            if ($cesp->save()) {
+                $this->new_message('Cuenta especial (M130I) para ingresos creada correctamente.');
+            } else {
+                $this->new_error_msg('Error al crear la cuenta especial (M130I).');
+            }
         }
 
-        $cesp->descripcion = "Cuenta especial para calculo de ingresos del modelo 130";
 
-        if ($cesp->save()) {
-            $this->new_message('Cuenta especial (M130I) para ingresos creada correctamente.');
-        } else {
-            $this->new_error_msg('Error al crear la cuenta especial (M130I).');
-        }
-
-        $this->cuenta_especial = new cuenta_especial();
 
         /// Crea cuenta especial para gastos si no existe
         $cesp = $this->cuenta_especial->get('M130G');
         if (!$cesp) {
             $cesp = new cuenta_especial();
             $cesp->idcuentaesp = 'M130G';
+
+            $cesp->descripcion = "Cuenta especial para calculo de gastos del modelo 130";
+
+            if ($cesp->save()) {
+                $this->new_message('Cuenta especial (M130G) para gastos creada correctamente.');
+            } else {
+                $this->new_error_msg('Error al crear la cuenta especial (M130G).');
+            }
         }
 
-        $cesp->descripcion = "Cuenta especial para calculo de gastos del modelo 130";
-
-        if ($cesp->save()) {
-            $this->new_message('Cuenta especial (M130G) para gastos creada correctamente.');
-        } else {
-            $this->new_error_msg('Error al crear la cuenta especial (M130G).');
-        }
-
-        $this->cuenta_especial = new cuenta_especial();
 
         /// Crea cuenta especial para las retenciones si no existe
         $cesp = $this->cuenta_especial->get('M130R');
         if (!$cesp) {
             $cesp = new cuenta_especial();
             $cesp->idcuentaesp = 'M130R';
-        }
 
-        $cesp->descripcion = "Cuenta especial para calculo de retenciones del modelo 130";
+            $cesp->descripcion = "Cuenta especial para calculo de retenciones del modelo 130";
 
-        if ($cesp->save()) {
-            $this->new_message('Cuenta especial (M130R) para retenciones creada correctamente.');
-        } else {
-            $this->new_error_msg('Error al crear la cuenta especial (M130R).');
+            if ($cesp->save()) {
+                $this->new_message('Cuenta especial (M130R) para retenciones creada correctamente.');
+            } else {
+                $this->new_error_msg('Error al crear la cuenta especial (M130R).');
+            }
         }
 
         $this->check_menu();
+        
+        header('Location: ' . $this->configuracion->url());
     }
 
     /**
-     * Cargamos el menú en la base de datos, pero en varias pasadas.
+     * Cargamos el menú en la base de datos.
      */
     private function check_menu()
     {
-        if (file_exists(__DIR__)) {
-            $max = 25;
+        if (!$this->page->get('modelo_130')) {
+            if (file_exists(__DIR__)) {
+                /// activamos las páginas del plugin
+                foreach (scandir(__DIR__) as $f) {
+                    if ($f != '.' and $f != '..' and is_string($f) and strlen($f) > 4 and ! is_dir($f) and $f != __CLASS__ . '.php') {
+                        $page_name = substr($f, 0, -4);
 
-            /// leemos todos los controladores del plugin
-            foreach (scandir(__DIR__) as $f) {
-                if ($f != '.' and $f != '..' and is_string($f) and strlen($f) > 4 and ! is_dir($f) and $f != __CLASS__ . '.php') {
-                    /// obtenemos el nombre
-                    $page_name = substr($f, 0, -4);
-
-                    /// lo buscamos en el menú
-                    $encontrado = false;
-                    foreach ($this->menu as $m) {
-                        if ($m->name == $page_name) {
-                            $encontrado = true;
-                            break;
-                        }
-                    }
-
-                    if (!$encontrado) {
                         require_once __DIR__ . '/' . $f;
                         $new_fsc = new $page_name();
 
@@ -133,21 +125,13 @@ class modelo130_wizard extends fs_controller
                         }
 
                         unset($new_fsc);
-
-                        if ($max > 0) {
-                            $max--;
-                        } elseif (!$this->get_errors()) {
-                            $this->recargar = true;
-                            $this->new_message('Instalando el menú... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
-                            break;
-                        }
                     }
                 }
+            } else {
+                $this->new_error_msg('No se encuentra el directorio ' . __DIR__);
             }
-        } else {
-            $this->new_error_msg('No se encuentra el directorio ' . __DIR__);
-        }
 
-        $this->load_menu(true);
+            $this->load_menu(true);
+        }
     }
 }
