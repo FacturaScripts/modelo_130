@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Document   : co_mod130.xml
+    Author     : Carlos Garcia Gomez
+    Author     : Pablo Zerón Gea
+    Description:
+        Estructura de la tabla co_mod130.
+-->
+<tabla>
+   <columna>
+      <nombre>codejercicio</nombre>
+      <tipo>character varying(4)</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>fechaasiento</nombre>
+      <tipo>date</tipo>
+      <nulo>YES</nulo>
+   </columna>
+   <columna>
+      <nombre>fechafin</nombre>
+      <tipo>date</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>fechainicio</nombre>
+      <tipo>date</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>idasiento</nombre>
+      <tipo>integer</tipo>
+      <nulo>YES</nulo>
+   </columna>
+   <columna>
+      <nombre>pagado</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>false</defecto>
+   </columna>
+   <columna>
+      <nombre>contabilizar</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>true</defecto>
+   </columna>
+   <columna>
+      <nombre>complementaria</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>true</defecto>
+   </columna>
+   <columna>
+      <nombre>cerrado</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>true</defecto>
+   </columna>
+   <columna>
+      <nombre>idmod130</nombre>
+      <tipo>serial</tipo>
+      <nulo>NO</nulo>
+      <defecto>nextval('co_mod130_idmod130_seq'::regclass)</defecto>
+   </columna>
+   <columna>
+      <nombre>periodo</nombre>
+      <tipo>character varying(8)</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_1</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_2</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_3</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_4</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_5</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_6</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_7</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_8</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_9</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_10</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_11</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_12</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_13</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_14</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_15</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_16</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_17</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_18</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>casilla_19</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>importe_deduccion_c19</nombre>
+      <tipo>double precision</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <restriccion>
+      <nombre>co_mod130_pkey</nombre>
+      <consulta>PRIMARY KEY (idmod130)</consulta>
+   </restriccion>
+</tabla>

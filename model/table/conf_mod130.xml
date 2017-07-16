@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Document   : conf_mod130.xml
+    Author     : Pablo Zerón Gea
+    Description:
+        Estructura de la tabla conf_mod130.
+-->
+<tabla>
+   <columna>
+      <nombre>codejercicio</nombre>
+      <tipo>character varying(4)</tipo>
+      <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>hipoteca</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>false</defecto>
+   </columna>
+   <columna>
+      <nombre>descuento100</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>false</defecto>
+   </columna>
+   <columna>
+      <nombre>difjust</nombre>
+      <tipo>boolean</tipo>
+      <nulo>NO</nulo>
+      <defecto>false</defecto>
+   </columna>
+   <restriccion>
+      <nombre>conf_mod130_pkey</nombre>
+      <consulta>PRIMARY KEY (codejercicio)</consulta>
+   </restriccion>
+</tabla>

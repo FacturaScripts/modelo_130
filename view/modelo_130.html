@@ -1,0 +1,809 @@
+{include="header"}
+
+{if="$fsc->s_mod130"}
+
+<link rel="stylesheet" href="{#FS_PATH#}plugins/modelo_130/view/css/modelo_130.css" />
+
+<script type="text/javascript">
+    var TextEncoderOrg = window.TextEncoder;
+    window.TextEncoder = null;</script>
+
+<script type="text/javascript" src="{$fsc->get_js_location('encoding-indexes.js')}"></script>
+<script type="text/javascript" src="{$fsc->get_js_location('encoding.js')}"></script>
+
+<script type="text/javascript">
+
+    function crear_fichero(text, name, type) {
+    if (!type) type = 'application/octet-stream';
+    var dlbtn = document.getElementById("dlbtn");
+    var file = new Blob([text], {type: type});
+    console.log('size=' + file.size);
+    console.log('type=' + file.type);
+    dlbtn.href = URL.createObjectURL(file);
+    dlbtn.download = name;
+    }
+
+    function rellenaEspacios(variable, numero, sentido){
+    if (!sentido) {sentido = 'derecha'; }
+
+    if (sentido == 'derecha'){
+    for (var i = 0; i < numero; i++){
+    variable += " ";
+    }
+    } else{
+    for (var i = 0; i < numero; i++){
+    variable = " " + variable;
+    }
+    }
+
+    return variable;
+    }
+
+    function convierte_a_texto(casilla){
+
+    var temporal = document.getElementById(casilla).value;
+    temporal = temporal.replace(/ /g, "");
+    temporal = temporal.replace("€", "");
+    temporal = temporal.replace(",", ".");
+    var temporal2 = parseFloat(temporal);
+    temporal = temporal.replace(".", "");
+    temporal = temporal.replace("-", "");
+    // completamos con ceros
+    for (i = temporal.length; i < 16; i++){
+    temporal = "0" + temporal;
+    }
+    // comprobamos si es negativo
+    if (temporal2 < 0){
+    temporal = "N" + temporal;
+    } else{
+    temporal = "0" + temporal;
+    }
+
+    return temporal;
+    }
+
+    function invertir(cadena) {
+    var x = cadena.length;
+    var cadenaInvertida = "";
+    while (x >= 0) {
+    cadenaInvertida = cadenaInvertida + cadena.charAt(x);
+    x--;
+    }
+    return cadenaInvertida;
+    }
+
+    function calcula_mod130()
+    {
+    var decla;
+    var nombre_fichero;
+    var f = new Date();
+    nombre_fichero = document.getElementById("cifnif").value + "_" + f.getFullYear() + "_" + invertir(document.getElementById("periodo").value) + ".130";
+    var encabezado = "<T1300" + f.getFullYear() + invertir(document.getElementById("periodo").value) + "0000><AUX>";
+    var pie = "</T13001000></T1300" + f.getFullYear() + invertir(document.getElementById("periodo").value) + "0000>";
+    encabezado = rellenaEspacios(encabezado, 68, 'derecha')
+
+            encabezado += "F 1.01    Q2826000H";
+    encabezado = rellenaEspacios(encabezado, 213, 'derecha')
+
+            encabezado += "</AUX><T13001000> ";
+    var decla_nif = document.getElementById("cifnif").value; // 9
+    var apellidos = document.getElementById("apellido1").value + ' ' + document.getElementById("apellido2").value; // 60
+
+    if (apellidos.length < 60){
+    // completamos con espacios
+    apellidos = rellenaEspacios(apellidos, 60 - apellidos.length, 'derecha');
+    } else
+    {
+    apellidos = apellidos.slice(0, 60);
+    }
+    var nombre = document.getElementById("nombre").value; //20
+    if (nombre.length < 20){
+    // completamos con espacios
+    nombre = rellenaEspacios(nombre, 20 - nombre.length, 'derecha');
+    } else
+    {
+    nombre = nombre.slice(0, 20);
+    }
+    // Faltan por hacer los demás datos de la empresa
+    var codejer = document.getElementById("ejercicio").value; // 4
+    var codperiodo = invertir(document.getElementById("periodo").value); // 2
+    var casillas = [];
+    var valor_casillas;
+    for (j = 1; j <= 19; j++){
+    casillas[j - 1] = convierte_a_texto("casilla_" + j.toString());
+    }
+
+    valor_casillas = casillas.join("");
+    var formaPago = document.getElementById("formaPago").value; // 0 No consta, 1 Efectivo, 2 Adeudo en cuenta, 3 Domiciliacion
+
+    var tipoDecla;
+    var resulCasilla19 = parseFloat(document.getElementById("casilla_19").value);
+    if (resulCasilla19 > 0){
+    tipoDecla = 'I';
+    } else{
+    tipoDecla = 'N';
+    }
+
+    var cuentaPago;
+    if (document.getElementById("cuentaPago").hasAttribute("disabled") == false){
+    cuentaPago = document.getElementById("cuentaPago").value;
+    if (cuentaPago.length < 34){
+    // completamos con espacios
+    cuentaPago = rellenaEspacios(cuentaPago, 34 - cuentaPago.length, 'derecha');
+    } else
+    {
+    cuentaPago = nombre.slice(0, 34);
+    }
+    } else{
+    cuentaPago = '                                  ';
+    }
+
+    var justAnterior;
+    if (document.getElementById("justAnterior").value.length > 0){
+    justAnterior = "X" + document.getElementById("justAnterior").value.toString();
+    } else{
+    justAnterior = '              '; //justi valido prueba 1348575683542
+    }
+
+    // Concadenamos todos los strings
+    var declaPart1 = encabezado + tipoDecla + decla_nif + apellidos + nombre + codejer + codperiodo;
+    var declaPart2 = rellenaEspacios("", 109, 'derecha');
+    decla = declaPart1 + valor_casillas + justAnterior + cuentaPago + declaPart2 + pie;
+    var codificado = new TextEncoder("windows-1252", { NONSTANDARD_allowLegacyEncoding: true }).encode(decla);
+    crear_fichero(codificado, nombre_fichero);
+    $("#modalGenFile").modal("hide");
+    }
+
+    function grabar(){
+    if (document.getElementById("dlbtn").hasAttribute("disabled") == false){
+    calcula_mod130();
+    }
+    }
+
+    function compValores(){
+        //comprueba metodo de pago
+        if (document.getElementById("formaPago").value == '3'){
+        document.getElementById("cuentaPago").removeAttribute("disabled");
+        } else{
+        document.getElementById("cuentaPago").setAttribute("disabled", "disabled");
+        }
+    }
+    
+    function compJust(){
+
+        /// Verifica longitud justificante anterior
+        if (document.getElementById("justAnterior").value.length > 0){
+        document.getElementById("groupJustAnterior").className = "form-group has-error has-feedback";
+        document.getElementById("iconoJustAnterior").className = "glyphicon glyphicon-remove form-control-feedback";
+        document.getElementById("dlbtn").setAttribute("disabled", "disabled");
+        } else{
+        document.getElementById("groupJustAnterior").className = "form-group";
+        document.getElementById("iconoJustAnterior").className = "";
+        }
+
+        if (document.getElementById("justAnterior").value.length == 13){
+        document.getElementById("groupJustAnterior").className = "form-group has-success has-feedback";
+        document.getElementById("iconoJustAnterior").className = "glyphicon glyphicon-ok form-control-feedback";
+        }
+
+        if (document.getElementById("justAnterior").value.length == 13 || document.getElementById("justAnterior").value.length == 0){
+        document.getElementById("dlbtn").removeAttribute("disabled");
+        }
+    }
+
+    $(document).ready(function() {
+    if (document.getElementById("complementaria").value == '1' || document.getElementById("cerrado").value == '1'){
+    $('#bcomplementaria').addClass('disabled');
+    $('#bcomplementaria').removeAttr('data-toggle');
+    $('#bcomplementaria').removeAttr('onclick');
+    } else{
+    $('#bcomplementaria').removeClass('disabled');
+    $('#bcomplementaria').attr("data-toggle", "modal");
+    $('#bcomplementaria').attr("onclick", "location.href = '{$fsc->url()}&complementaria=TRUE&id={$fsc->s_mod130->idmod130}'");
+    }
+
+    if (document.getElementById("cerrado").value == '1'){
+    $('#bdelete').addClass('disabled');
+    $('#bdelete').removeAttr('data-toggle');
+    $('#bdelete').removeAttr('onclick');
+    $('#bdelete').attr("title", "Para eliminar este trimestre, debe eliminar primero los posteriores");
+    $('#openModal').addClass('disabled');
+    $('#openModal').removeAttr('data-toggle');
+    } else{
+    $('#bdelete').removeClass('disabled');
+    $('#bdelete').attr("data-toggle", "modal");
+    $('#bdelete').attr("onclick", "location.href = '{$fsc->url()}&delete={$fsc->s_mod130->idmod130}'");
+    $('#bdelete').attr("title", "Elimina el trimestre actual");
+    $('#openModal').removeClass('disabled');
+    $('#openModal').attr("data-toggle", "modal");
+    }
+
+    if (parseFloat(document.getElementById("casilla_19").value) > 0){
+    document.getElementById("bpago").removeAttribute("disabled");
+    } else{
+    document.getElementById("bpago").setAttribute("disabled", "disabled");
+    }
+    });</script>
+
+
+<div class="container-fluid">
+    <div class="row hidden-print">
+        <div class="col-sm-6">
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-primary" onclick="location.href = '{$fsc->url()}'" title="Vuelve al listado general">
+                    <span class="glyphicon glyphicon-arrow-left"></span>
+                    <span class="hidden-xs">&nbsp; Todo</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="location.href = '{$fsc->s_mod130->url()}'" title="Recargar la página">
+                    <span class="glyphicon glyphicon-refresh"></span>
+                </button>
+            </div>
+            <div class="btn-group">
+                {loop="$fsc->extensions"}
+                {if="$value->type=='button'"}
+                <a href="index.php?page={$value->from}&id={$fsc->s_mod130->idmod130}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
+                {/if}
+                {/loop}
+            </div>
+
+            <div class="btn-group">
+                {if="$fsc->s_mod130->pagado"}
+                <button type="button" role="button" id="bpago" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown"  title="Crea o borra asiento de pago si el resultado de la declaración es mayor que 0">
+                    <span class="glyphicon glyphicon-ok"></span> &nbsp; Pagado <span class="caret"></span>
+                </button>
+                {else}
+                <button type="button" role="button" id="bpago" class="btn btn-sm btn-danger dropdown-toggle" data-toggle="dropdown"  title="Crea o borra asiento de pago si el resultado de la declaración es mayor que 0">
+                    <span class="glyphicon glyphicon-remove"></span> &nbsp; Sin pagar <span class="caret"></span>
+                </button>
+                {/if}
+                <ul class="dropdown-menu" role="menu">
+                    {if="!$fsc->s_mod130->pagado"}
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#modal_pagar">
+                            <span class="glyphicon glyphicon-ok"></span> &nbsp; Pagado
+                        </a>
+                    </li>
+                    {else}
+                    <li>
+                        <a href="{$fsc->url()}&pagado=FALSE&id={$fsc->s_mod130->idmod130}">
+                            <span class="glyphicon glyphicon-remove"></span> &nbsp; Sin pagar
+                        </a>
+                    </li>
+                    {/if}
+                </ul>
+            </div>
+            <button type="button" id="bcomplementaria" class="btn btn-sm btn-warning" onclick="location.href = '{$fsc->url()}&complementaria=TRUE&id={$fsc->s_mod130->idmod130}'" title="Genera declaración complementaria">
+                <span class="glyphicon glyphicon-tag"></span>
+                <span class="hidden-xs">&nbsp; Complementaria</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-info" onclick="window.print();"  title="Imprime los resultados del trimestre">
+                <span class="glyphicon glyphicon-print"></span>
+                <span class="hidden-xs">&nbsp; Imprimir</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-info" id="openModal" data-toggle="modal" data-target="#modalGenFile"  title="Genera archivo para presentar telematicamente el modelo">
+                <span class="glyphicon glyphicon-floppy-disk"></span>
+                <span class="hidden-xs">&nbsp; Generar Fichero</span>
+            </button>
+        </div>
+        <div class="col-sm-6 text-right">
+            {if="$fsc->allow_delete"}
+            <button type="button" id="bdelete" class="btn btn-sm btn-danger" onclick="location.href = '{$fsc->url()}&delete={$fsc->s_mod130->idmod130}'">
+                <span class="glyphicon glyphicon-trash"></span>
+                <span class="hidden-xs">&nbsp; Eliminar</span>
+            </button>
+            {/if}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1>
+                    <span class="glyphicon glyphicon-book"></span>
+                    Modelo 130
+                    <small>{$fsc->s_mod130->periodo}@{$fsc->s_mod130->codejercicio}</small>
+                </h1>
+                <p class="help-block">
+                    Modelo 130 del {$fsc->s_mod130->fechainicio} a {$fsc->s_mod130->fechafin}
+                </p>
+            </div>
+            <div class="table-responsive hidden-print">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Ejercicio</th>
+                            <th class="text-left">Periodo</th>
+                            <th class="text-center">Fecha de inicio</th>
+                            <th class="text-center">Fecha fin</th>
+                            <th class="text-right">Asiento (fecha)</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td class="text-left"><a href="{$fsc->s_mod130->ejercicio_url()}">{$fsc->s_mod130->codejercicio}</a></td>
+                        <td class="text-left">{$fsc->s_mod130->periodo}</td>
+                        <td class="text-center">{$fsc->s_mod130->fechainicio}</td>
+                        <td class="text-center">{$fsc->s_mod130->fechafin}</td>
+                        <td class="text-right">
+                            {if="$fsc->s_mod130->fechaasiento != '01-01-1970'"}
+                            <a target="_blank" href="{$fsc->s_mod130->asiento_url()}">Asiento</a>
+                            ({$fsc->s_mod130->fechaasiento})
+                            {/if}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8">
+            <input readonly hidden type="text" name="periodo" id="periodo" value="{$fsc->s_mod130->periodo}"/>
+            <input readonly hidden type="text" name="ejercicio" id="ejercicio" value="{$fsc->s_mod130->codejercicio}"/>
+            <input readonly hidden type="text" name="nombre" id="nombre" value="{$fsc->nombreSeparado['Nombres']}"/>
+            <input readonly hidden type="text" name="apellido1" id="apellido1" value="{$fsc->nombreSeparado['Paterno']}"/>
+            <input readonly hidden type="text" name="apellido2" id="apellido2" value="{$fsc->nombreSeparado['Materno']}"/>
+            <input readonly hidden type="text" name="cifnif" id="cifnif" value="{$fsc->empresa->cifnif}"/>
+            <input readonly hidden type="text" name="complementaria" id="complementaria" value="{$fsc->s_mod130->complementaria}"/>
+            <input readonly hidden type="text" name="cerrado" id="cerrado" value="{$fsc->s_mod130->cerrado}"/>
+            <h3>Resumen Modelo 130</h3>
+            <table class="table table-sm table-borderless">
+                <thead>
+                    <tr>
+                        <th><big>I. Actividades económicas en estimación directa, modalidad normal o simplificada, distintas de las agrícolas, ganaderas,forestales y pesqueras<br>&nbsp&nbsp&nbsp(Datos acumulados del periodo comprendido entre el primer día del año y el último día del trimestre).</big></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ingresos computables correspondientes al conjunto de las actividades ejercidas [01]:</td>
+                        <td width="150"><input readonly type="text" name="casilla_1" id="casilla_1" value="{$fsc->show_precio($fsc->s_mod130->casilla_1)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+
+                    </tr>
+                    <tr>
+                        <td>Gastos fiscalmente deducibles correspondientes al conjunto de actividades ejercidas{if="$fsc->difjust"}, (incluido el 5% por gastos de difícil justificación){/if} [02]:</td>
+                        <td><input readonly type="text" name="casilla_2" id="casilla_2" value="{$fsc->show_precio($fsc->s_mod130->casilla_2)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                    </tr>
+                    <tr>
+                        <td>Rendimiento neto (01-02) [03]:</td>
+                        <td><input readonly type="text" name="casilla_3" id="casilla_3" value="{$fsc->show_precio($fsc->s_mod130->casilla_3)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                    </tr>
+                    <tr>
+                        <td>20 por 100 del importe de la casilla (03) [04]:</td>
+                        <td><input readonly type="text" name="casilla_4" id="casilla_4" value="{$fsc->show_precio($fsc->s_mod130->casilla_4)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                    </tr>
+                    <tr>
+                        <th><big>A deducir:</big></th>
+                </tr>
+                <tr>
+                    <td>De los trimestres anteriores [05]:<br>Suma de los importes positivos de la casilla (07) menos la suma de los importes de la casilla (16):</td>
+                    <td><input readonly type="text" name="casilla_5" id="casilla_5" value="{$fsc->show_precio($fsc->s_mod130->casilla_5)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td>Retenciones e ingresos a cuenta soportados por las actividades incluidas en este apartado y correspondientes<br>al período comprendido entre el primer día del año y el último día del trimestre [06]:</td>
+                    <td><input readonly type="text" name="casilla_6" id="casilla_6" value="{$fsc->show_precio($fsc->s_mod130->casilla_6)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <th><big>Pago fraccionado previo del trimestre (04-05-06) [07]</big></th>
+                <td><input readonly type="text" name="casilla_7" id="casilla_7" value="{$fsc->show_precio($fsc->s_mod130->casilla_7)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <th><big>II. Actividades agrícolas, ganaderas, forestales y pesqueras en estimación directa, modalidad normal o simplificada</big></th>
+                </tr>
+                <tr>
+                    <td>Volumen de ingresos del trimestre (excluidas las subvenciones de capital y las indemnizaciones) [08]</td>
+                    <td><input readonly type="text" name="casilla_8" id="casilla_8" value="{$fsc->show_precio($fsc->s_mod130->casilla_8)}" class="form-control text-right input-sm"  autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td>2 por 100 del importe de la casilla (08) [09]</td>
+                    <td><input readonly type="text" name="casilla_9" id="casilla_9" value="{$fsc->show_precio($fsc->s_mod130->casilla_9)}" class="form-control text-right input-sm"  autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td><b>A deducir:</b>Retenciones e ingresos a cuenta soportados por las actividades incluidas en este apartado, correspondientes al trimestre [10]</td>
+                    <td><input readonly type="text" name="casilla_10" id="casilla_10" value="{$fsc->show_precio($fsc->s_mod130->casilla_10)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <th><big>Pago fraccionado previo del trimestre ((09)-(10)) [11]</big></th>
+                <td><input readonly type="text" name="casilla_11" id="casilla_11" value="{$fsc->show_precio($fsc->s_mod130->casilla_11)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <th><big>III. Total liquidación</big></th>
+                </tr>
+                <tr>
+                    <td>Suma de pagos fraccionados previos del trimestre (07+11) [12]</td>
+                    <td><input readonly type="text" name="casilla_12" id="casilla_12" value="{$fsc->show_precio($fsc->s_mod130->casilla_12)}" class="form-control text-right input-sm"  autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td>A deducir: Minoración por aplicación de la deducción a que se refiere el artículo 110.3 c) del reglamento del Impuesto. [13]</td>
+                    <td><input readonly type="text" name="casilla_13" id="casilla_13" value="{$fsc->show_precio($fsc->s_mod130->casilla_13)}" class="form-control text-right input-sm"  autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td><b>Diferencia</b> (12 - 13) [14]</td>
+                    <td><input readonly type="text" name="casilla_14" id="casilla_14" value="{$fsc->show_precio($fsc->s_mod130->casilla_14)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td>A deducir (sólo si la diferencia anterior es positiva y con el máximo de su importe):</td>
+                </tr>
+                <tr>
+                    <td>Resultados negativos de trimestres anteriores [15]</td>
+                    <td><input readonly type="text" name="casilla_15" id="casilla_15" value="{$fsc->show_precio($fsc->s_mod130->casilla_15)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td>Por destinar cantidades al pago de préstamos para la adquisición o rehabilitación de la vivienda habitual [16]</td>
+                    <td><input readonly type="text" name="casilla_16" id="casilla_16" value="{$fsc->show_precio($fsc->s_mod130->casilla_16)}" class="form-control text-right input-sm"  autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td><b>Total</b> (14 - 15 - 16). [17]</td>
+                    <td><input readonly type="text" name="casilla_17" id="casilla_17" value="{$fsc->show_precio($fsc->s_mod130->casilla_17)}" class="form-control text-right input-sm"  autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td>A deducir (exclusivamente en caso de declaración complementaria):</td>
+                </tr>
+                <tr>
+                    <td>Resultado a ingresar de las anteriores declaraciones presentadas por el mismo concepto, ejercicio y período [18]</td>
+                    <td><input readonly type="text" name="casilla_18" id="casilla_18" value="{$fsc->show_precio($fsc->s_mod130->casilla_18)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <th><big>Resultado de la declaración (17 - 18) [19]</big></th>
+                <td><input readonly type="text" name="casilla_19" id="casilla_19" value="{$fsc->show_precio($fsc->s_mod130->casilla_19)}" class="form-control text-right input-sm" autocomplete="off"/></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-4 hidden-print">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <caption class="text-center">Asiento de pago</caption>
+                    <thead>
+                        <tr>
+                            <th class="text-left">Subcuenta</th>
+                            <th class="text-right">Debe</th>
+                            <th class="text-right">Haber</th>
+                        </tr>
+                    </thead>
+                    {loop="$fsc->s_mod130->get_partidas()"}
+                    <tr class="clickableRow" href="{$value->url()}">
+                        <td><a href="{$value->url()}">{$value->codsubcuenta}</a></td>
+                        <td class="text-right">{$fsc->show_precio($value->debe, $value->coddivisa)}</td>
+                        <td class="text-right">{$fsc->show_precio($value->haber, $value->coddivisa)}</td>
+                    </tr>
+                    {else}
+                    <tr class="warning">
+                        <td colspan="3">No existe asiento de pago.</td>
+                    </tr>
+                    {/loop}
+                </table>
+            </div>
+            {if="$fsc->s_mod130->get_partidas()"}
+            <p class='help-block'>
+                Este asiento se ha generado atendiendo a los saldos de las subcuentas a fecha {$fsc->s_mod130->fechafin}
+            </p>
+            {/if}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalGenFile">
+    <div class="modal-dialog">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">Generar fichero para presentación telemática
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </h3>
+            </div>
+            <div class="modal-body">
+                {if="$fsc->s_mod130->complementaria"}
+                <div class="form-group" id="groupJustAnterior">
+                    <label class="form-control-label" for="justAnterior">
+                        &nbsp;&nbsp;Si se trata de una declaración complementaria:
+                    </label>
+                    <input type="text" name="justAnterior" id="justAnterior" value="" class="form-control" onkeyup="compJust()" autocomplete="off" placeholder="Indique el código justificante de la declaración anterior"/>
+                    <span class="" id="iconoJustAnterior"></span>
+                </div>
+                {/if}
+                <div class="form-group">
+                    <label class="form-control-label" for="formaPago">
+                        &nbsp;&nbsp;Forma de Pago:
+                    </label>
+                    <select name="formaPago" id="formaPago" class="form-control" onchange="compValores()">
+                        <option value="1">Efectivo</option>
+                        <option value="2">Ingreso a anotar en CCT</option>
+                        <option value="3">Domiciliación</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="cuentaPago">
+                        &nbsp;&nbsp;Cuenta Bancaria:
+                    </label>
+                    <select name="cuentaPago" id="cuentaPago" class="form-control" disabled="">
+                        {loop="$fsc->cuenta_banco->all()"}
+                        <option value="{$value->iban}">{$value->descripcion}</option>
+                        {/loop}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-sm btn-default" id="dlbtn" onclick="grabar();">
+                    <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
+                    <span class="hidden-xs">&nbsp; Generar fichero</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form action="{$fsc->url()}&pagado=TRUE&id={$fsc->s_mod130->idmod130}" method="post" class="form">
+    <div class="modal fade" id="modal_pagar">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Pago del modelo 130</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        Fecha del pago:
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                            <input type="text" name="mod130_pagado" value="{$fsc->today()}" class="form-control datepicker" required="" autocomplete="off"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        Forma de Pago:
+                        <select name="PagoAsiento130" class="form-control">
+                            <option value="">Caja</option>
+                            <option value="">------</option>
+                            {loop="$fsc->cuenta_banco->all()"}
+                            <option value="{$value->codcuenta}">{$value->descripcion}</option>
+                            {/loop}
+                        </select>
+                        <p class="help-block">Se generará un asiento de pago.</p>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-sm btn-primary" type="submit">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{else}
+
+<link rel="stylesheet" href="{#FS_PATH#}plugins/modelo_130/view/css/modelo_130.css" />
+
+<script type="text/javascript">
+    function cambiar_fecha()
+    {
+    if (document.f_nuevo_130.periodo.value == 'T1')
+    {
+    $("#f_desde").val('01-01-{function="date('Y')"}').datepicker('update');
+    $("#f_hasta").val('31-03-{function="date('Y')"}').datepicker('update');
+    }
+    else if (document.f_nuevo_130.periodo.value == 'T2')
+    {
+    $("#f_desde").val('01-01-{function="date('Y')"}').datepicker('update');
+    $("#f_hasta").val('30-06-{function="date('Y')"}').datepicker('update');
+    }
+    else if (document.f_nuevo_130.periodo.value == 'T3')
+    {
+    $("#f_desde").val('01-01-{function="date('Y')"}').datepicker('update');
+    $("#f_hasta").val('30-09-{function="date('Y')"}').datepicker('update');
+    }
+    else
+    {
+    $("#f_desde").val('01-01-{function="date('Y')"}').datepicker('update');
+    $("#f_hasta").val('31-12-{function="date('Y')"}').datepicker('update');
+    }
+    }
+    function completar_mod130()
+    {
+    document.f_nuevo_130.proceso.value = 'comprobar';
+    $.ajax({
+    type: 'POST',
+            url: '{$fsc->url()}',
+            dataType: 'html',
+            data: $("form[name=f_nuevo_130]").serialize(),
+            success: function(datos) {
+            $("#div_completar_mod130").hide();
+            $("#lineas_mod130").html(datos);
+            }
+    });
+    }
+    
+    function guardar_mod130()
+    {
+    document.f_nuevo_130.proceso.value = 'guardar';
+    document.f_nuevo_130.submit();
+    }
+    
+    $(document).ready(function() {
+        if (window.location.hash.substring(1) == 'nueva')
+        {
+            $("#lineas_mod130").html('');
+            $("#modal_nuevo_130").modal('show');
+        }
+    
+       var hash = window.location.hash;
+        hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+        $('.nav-tabs a').click(function (e) {
+          $(this).tab('show');
+          var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+          window.location.hash = this.hash;
+          $('html,body').scrollTop(scrollmem);
+        });
+    
+    });
+</script>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1>
+                    <span class="glyphicon glyphicon-book"></span>
+                    Modelo 130
+                    <a class="btn btn-xs btn-primary" href="{$fsc->url()}" title="Recargar la página">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                    </a>
+                    <span class="btn-group">
+                        <a class="btn btn-xs btn-success" href="{$fsc->url()}&caca={$fsc->random_string()}#nueva" title="Genera un nuevo modelo 130">
+                            <span class="glyphicon glyphicon-plus"></span>&nbsp; Nuevo
+                        </a>
+                        {loop="$fsc->extensions"}
+                        {if="$value->type=='button'"}
+                        <a href="index.php?page={$value->from}{$value->params}" class="btn btn-xs btn-default">{$value->text}</a>
+                        {/if}
+                        {/loop}
+                    </span>
+                </h1>
+                <p class="help-block">
+                    Declaración del modelo 130 trimestral a la hacienda española.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ul id='tab_modelo_130' class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#listado" aria-controls="listado" role="tab" data-toggle="tab">
+            <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+            <span class="hidden-xs"  title="Muestra todos los 130 generados">&nbsp;Listado</span>
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#config" aria-controls="config" role="tab" data-toggle="tab">
+            <i class="fa fa-magic"></i>
+            <span class="hidden-xs"  title="Configura las opciones del generador">&nbsp;Configuración</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="listado">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Ejercicio</th>
+                                <th class="text-center">Periodo</th>
+                                <th class="text-center">Fecha Inicio</th>
+                                <th class="text-center">Fecha Fin</th>
+                                <th class="text-center">Ingresos [1]</th>
+                                <th class="text-center">Gastos [2]</th>
+                                <th class="text-center">Autoliquidación [19]</th>
+                                <th class="text-center">Fecha Asiento</th>
+                            </tr>
+                        </thead>
+                        {loop="$fsc->mod130->all()"}
+                        <tr class="clickableRow" href="{$value->url()}">
+                            <td class="text-center">{$value->codejercicio}</td>
+                            <td class="text-center"><a href="{$value->url()}">{$value->periodo}</a></td>
+                            <td class="text-center">{$value->fechainicio}</td>
+                            <td class="text-center">{$value->fechafin}</td>
+                            <td class="text-center">{$fsc->show_precio($value->casilla_1)}</td>
+                            <td class="text-center">{$fsc->show_precio($value->casilla_2)}</td>
+                            <td class="text-center">{$fsc->show_precio($value->casilla_19)}</td>
+                            {if="$value->fechaasiento != '01-01-1970'"}
+                            <td class="text-center">{$value->fechaasiento}</td>
+                            {else}
+                            <td class="text-center"></td>
+                            {/if}
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                            <td colspan="13">Sin resultados. Pulsa el botón <b>Nuevo</b> para hacer generar un modelo 130.</td>
+                        </tr>
+                        {/loop}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="config">
+        <form name="f_configuracion" action="{$fsc->url()}&saveconfig=TRUE" method="post" class="form" role="form">
+                <div class="panel-heading">
+                    <h3 class="panel-title text-center" style="font-size:32px;">Opciones para la generación del modelo 130</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="col-sm-6 text-right">
+                        
+                        <div class="form-group row">
+                            <label for="difjust" style="font-size:16px;">¿Quieres añadir el 5% por gastos de difícil justificación?
+                                <input type="checkbox" name="difjust" id="difjust" class="badgebox" value="TRUE" {if="$fsc->difjust"} checked=""{/if}>
+                                <span class="badge">&check;</span>
+                            </label>
+                        </div>
+                        <div class="form-group row">
+                            <label for="descuento" style="font-size:16px;">¿Quieres incluir el descuento de 400€ en caso de que sea aplicable?
+                                <input type="checkbox" name="descuento" id="descuento" class="badgebox" value="TRUE" {if="$fsc->descuento"} checked=""{/if}>
+                                <span class="badge">&check;</span>
+                            </label>
+                        </div>
+                        <div class="form-group row">
+                            <label for="hipoteca" style="font-size:16px;">¿Tienes derecho al descuento por pago de hipoteca?
+                                <input type="checkbox" name="hipoteca" id="hipoteca" class="badgebox" value="TRUE" {if="$fsc->hipoteca"} checked=""{/if}>
+                                <span class="badge">&check;</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-right">
+                    <button class="btn btn-sm btn-primary" type="submit">
+                        <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar
+                    </button>
+                </div>
+        </form>
+    </div>
+</div>     
+
+<form class="form-horizontal" role="form" name="f_nuevo_130" action="{$fsc->url()}" method="post">
+    <input type="hidden" name="proceso" value=""/>
+    <div class="modal fade" id="modal_nuevo_130">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nuevo modelo 130</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="periodo" class="col-sm-2 control-label">Período</label>
+                        <div class="col-sm-10">
+                            <select name="periodo" class="form-control" onchange="cambiar_fecha(); completar_mod130()">
+                                {if="$fsc->periodo=='T1'"}<option value="T1" selected="">T1</option>{else}<option>T1</option>{/if}
+                                {if="$fsc->periodo=='T2'"}<option value="T2" selected="">T2</option>{else}<option>T2</option>{/if}
+                                {if="$fsc->periodo=='T3'"}<option value="T3" selected="">T3</option>{else}<option>T3</option>{/if}
+                                {if="$fsc->periodo=='T4'"}<option value="T4" selected="">T4</option>{else}<option>T4</option>{/if}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="desde" class="col-sm-2 control-label">Desde</label>
+                        <div class="col-sm-10">
+                            <input id="f_desde" class="form-control datepicker" type="text" name="desde" value="{$fsc->fecha_desde}"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="hasta" class="col-sm-2 control-label">Hasta</label>
+                        <div class="col-sm-10">
+                            <input id="f_hasta" class="form-control datepicker" type="text" name="hasta" value="{$fsc->fecha_hasta}"/>
+                        </div>
+                    </div>
+                </div>
+                <div id="div_completar_mod130" class="modal-footer">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="completar_mod130()">
+                        <span class="glyphicon glyphicon-play"></span>&nbsp; Calcular
+                    </button>
+                </div>
+                <div id="lineas_mod130"></div>
+            </div>
+        </div>
+    </div>
+</form>
+{/if}
+{include="footer"}
