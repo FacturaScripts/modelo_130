@@ -213,7 +213,7 @@ class modelo_130 extends fs_controller
 
                     if ($this->configuracion->save()) {
                         $this->new_message('<a href="' . $this->configuracion->url() . '">Configuración guardada correctamente.');
-                        header('Location: ' . $this->configuracion->url());
+                        // header('Location: ' . $this->configuracion->url());
                     } else {
                         $this->new_error_msg('Imposible guardar configuración.');
                     }
@@ -327,7 +327,7 @@ class modelo_130 extends fs_controller
                 // Si ya esta creado el trimestre no se continua
                 if ($this->mod130->all_from_ejercicio_periodo($eje0->codejercicio, filter_input(INPUT_POST, 'periodo'))) {
                     $this->new_error_msg('El modelo 130 correspondiente al periodo ' . filter_input(INPUT_POST, 'periodo') .
-                    ' ya ha sido creado, si deseea generar una declaración complementaria, entre dentro de la declaración y pulse el botón "Generar Complementaria".');
+                            ' ya ha sido creado, si deseea generar una declaración complementaria, entre dentro de la declaración y pulse el botón "Generar Complementaria".');
                     $continuar = false;
                 } else {
                     // Si el trimestre que queremos crear es posterior al último creado continuamos
@@ -343,7 +343,7 @@ class modelo_130 extends fs_controller
             } else {
                 if ($this->s_mod130->cerrado) {
                     $this->new_error_msg('Este trimestre se encuentra cerrado, si deseea generar una declaración complementaria de este periodo'
-                    .', borre todos los trimestres posteriores.');
+                            . ', borre todos los trimestres posteriores.');
                     $continuar = false;
                 } else {
                     $this->fecha_hasta = $this->s_mod130->fechafin;
@@ -423,7 +423,7 @@ class modelo_130 extends fs_controller
                 }
 
                 if ($pagado and $continuar) {
-                    
+
                     /// Si se elige pago por banco se lee el número de cuenta, si no se usa el de caja por defecto
                     $codcaja = '5700000000';
                     if (filter_input(INPUT_POST, 'PagoAsiento130')) {
@@ -513,8 +513,6 @@ class modelo_130 extends fs_controller
 
     private function calcula_casillas()
     {
-        $this->aux_mod130 = array();
-
         $this->casilla_3 = 0;
         $this->casilla_4 = 0;
         $this->casilla_5 = 0;
@@ -580,29 +578,24 @@ class modelo_130 extends fs_controller
 
         /// Obtenemos el valor de la casilla 6 (Rentenciones)
 
-        foreach ($this->mod130->all_from_cuenta_ejer('4751', $eje0->codejercicio) as $scta_cuenta) {
-            $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
-            if ($tot_cuenta['saldo']) {
-                $this->aux_mod130[] = array(
-                    'subcuenta' => $scta_cuenta,
-                    'debe' => $tot_cuenta['debe'],
-                    'haber' => $tot_cuenta['haber']
-                );
+        $cuentas_retenciones = array("473");
 
-                $this->casilla_6 += (($tot_cuenta['debe'] - $tot_cuenta['haber']) * -1);
+        foreach ($cuentas_retenciones as $rentenciones) {
+            foreach ($this->mod130->all_from_cuenta_ejer($rentenciones, $eje0->codejercicio) as $scta_cuenta) {
+                $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
+                if ($tot_cuenta['saldo']) {
+                    $this->casilla_6 += (($tot_cuenta['debe'] - $tot_cuenta['haber']));
+                }
             }
         }
 
+        /// Leemos las cuentas marcadas como retenciones en su cuenta especial
         foreach ($this->subcuenta->all_from_cuentaesp('M130R', $eje0->codejercicio) as $scta_cuenta) {
-            $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
-            if ($tot_cuenta['saldo']) {
-                $this->aux_mod130[] = array(
-                    'subcuenta' => $scta_cuenta,
-                    'debe' => $tot_cuenta['debe'],
-                    'haber' => $tot_cuenta['haber']
-                );
-
-                $this->casilla_6 += ($tot_cuenta['debe'] - $tot_cuenta['haber'] * -1);
+            if (!in_array($scta_cuenta->codcuenta, $cuentas_retenciones)) {
+                $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
+                if ($tot_cuenta['saldo']) {
+                    $this->casilla_6 += ($tot_cuenta['debe'] - $tot_cuenta['haber']);
+                }
             }
         }
 
@@ -618,7 +611,6 @@ class modelo_130 extends fs_controller
         }
 
         /// Casilla 13
-
         if ($this->descuento) {
             /// Se leen los datos del año pasado en caso de existir
             foreach ($this->mod130->all_from_ejercicio($eje0->codejercicio - 1) as $datos) {
@@ -754,18 +746,20 @@ class modelo_130 extends fs_controller
                 }
             }
         }
-        
+
         /// Leemos las cuentas marcadas como ingresos en su cuenta especial
         foreach ($this->subcuenta->all_from_cuentaesp('M130I', $eje0->codejercicio) as $scta_cuenta) {
-            $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
-            if ($tot_cuenta['saldo']) {
-                $this->aux_mod130[] = array(
-                    'subcuenta' => $scta_cuenta,
-                    'debe' => $tot_cuenta['debe'],
-                    'haber' => $tot_cuenta['haber']
-                );
+            if (!in_array($scta_cuenta->codcuenta, $cuentas_ingresos)) {
+                $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
+                if ($tot_cuenta['saldo']) {
+                    $this->aux_mod130[] = array(
+                        'subcuenta' => $scta_cuenta,
+                        'debe' => $tot_cuenta['debe'],
+                        'haber' => $tot_cuenta['haber']
+                    );
 
-                $this->casilla_1 += ($tot_cuenta['haber'] - $tot_cuenta['debe']);
+                    $this->casilla_1 += ($tot_cuenta['haber'] - $tot_cuenta['debe']);
+                }
             }
         }
 
@@ -789,15 +783,17 @@ class modelo_130 extends fs_controller
 
         /// Leemos las cuentas marcadas como gastos en su cuenta especial
         foreach ($this->subcuenta->all_from_cuentaesp('M130G', $eje0->codejercicio) as $scta_cuenta) {
-            $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
-            if ($tot_cuenta['saldo']) {
-                $this->aux_mod130[] = array(
-                    'subcuenta' => $scta_cuenta,
-                    'debe' => $tot_cuenta['debe'],
-                    'haber' => $tot_cuenta['haber']
-                );
+            if (!in_array($scta_cuenta->codcuenta, $cuentas_gastos)) {
+                $tot_cuenta = $this->partida->totales_from_subcuenta_fechas($scta_cuenta->idsubcuenta, $this->fecha_desde, $this->fecha_hasta);
+                if ($tot_cuenta['saldo']) {
+                    $this->aux_mod130[] = array(
+                        'subcuenta' => $scta_cuenta,
+                        'debe' => $tot_cuenta['debe'],
+                        'haber' => $tot_cuenta['haber']
+                    );
 
-                $this->casilla_2 += ($tot_cuenta['debe'] - $tot_cuenta['haber']);
+                    $this->casilla_2 += ($tot_cuenta['debe'] - $tot_cuenta['haber']);
+                }
             }
         }
 
@@ -866,13 +862,13 @@ class modelo_130 extends fs_controller
     {
         $nombreCompleto = $this->stripAccents($nombreCompleto);
         $chunks = ($apellido_primero) ? explode(" ", mb_strtoupper($nombreCompleto)) : array_reverse(explode(" ", mb_strtoupper($nombreCompleto)));
-        
+
         $exceptions = ["DA", "DE", "LA", "DEL", "LOS", "LAS", "SAN", "SANTA"];
         $existen = array_intersect($chunks, $exceptions);
         $nombre = array("Materno" => "", "Paterno" => "", "Nombres" => "");
         $agregar_en = ($apellido_primero) ? "paterno" : "materno";
         $primera_vez = true;
-       
+
         if ($apellido_primero) {
             if (!empty($existen)) {
                 foreach ($chunks as $chunk) {
@@ -985,7 +981,7 @@ class modelo_130 extends fs_controller
     {
         $act_per = intval(str_replace(array('T', 'C'), array('', ''), $periodo));
         $ult_per = 0;
-        
+
         $data = $this->db->select("SELECT * FROM co_mod130 WHERE idmod130=(SELECT MAX(idmod130) FROM co_mod130) AND codejercicio = " . $ejercicio . ";");
         if ($data) {
             $cadena = str_replace(array('T', 'C'), array('', ''), $data[0]['periodo']);

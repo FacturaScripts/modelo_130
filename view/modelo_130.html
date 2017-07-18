@@ -694,6 +694,7 @@
                                 <th class="text-center">Fecha Fin</th>
                                 <th class="text-center">Ingresos [1]</th>
                                 <th class="text-center">Gastos [2]</th>
+                                <th class="text-center">Rendimiento [3]</th>
                                 <th class="text-center">Autoliquidación [19]</th>
                                 <th class="text-center">Fecha Asiento</th>
                             </tr>
@@ -706,6 +707,7 @@
                             <td class="text-center">{$value->fechafin}</td>
                             <td class="text-center">{$fsc->show_precio($value->casilla_1)}</td>
                             <td class="text-center">{$fsc->show_precio($value->casilla_2)}</td>
+                            <td class="text-center">{$fsc->show_precio($value->casilla_3)}</td>
                             <td class="text-center">{$fsc->show_precio($value->casilla_19)}</td>
                             {if="$value->fechaasiento != '01-01-1970'"}
                             <td class="text-center">{$value->fechaasiento}</td>
@@ -731,7 +733,6 @@
                 </div>
                 <div class="panel-body">
                     <div class="col-sm-6 text-right">
-                        
                         <div class="form-group row">
                             <label for="difjust" style="font-size:16px;">¿Quieres añadir el 5% por gastos de difícil justificación?
                                 <input type="checkbox" name="difjust" id="difjust" class="badgebox" value="TRUE" {if="$fsc->difjust"} checked=""{/if}>
