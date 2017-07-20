@@ -213,7 +213,7 @@ class modelo_130 extends fs_controller
 
                     if ($this->configuracion->save()) {
                         $this->new_message('<a href="' . $this->configuracion->url() . '">Configuración guardada correctamente.');
-                        // header('Location: ' . $this->configuracion->url());
+                        header('Location: ' . $this->configuracion->url());
                     } else {
                         $this->new_error_msg('Imposible guardar configuración.');
                     }
@@ -537,6 +537,7 @@ class modelo_130 extends fs_controller
         $casilla_19_deduccion = 0;
         $casRenAnt_1 = 0;
         $casRenAnt_2 = 0;
+        $totalPagos = 0;
 
         $eje0 = $this->ejercicio->get_by_fecha($this->fecha_desde, true);
 
@@ -572,6 +573,10 @@ class modelo_130 extends fs_controller
 
                 $casilla_16_sum += (float) $datos->casilla_16;
             }
+            /// Si existe asiento sumamos el importe de la casilla 19
+            if ($datos->idasiento) {
+                $totalPagos += (float) $datos->casilla_19;
+            }
         }
 
         $this->casilla_5 = round($casilla_7_sum_pos - $casilla_16_sum, FS_NF0);
@@ -598,6 +603,11 @@ class modelo_130 extends fs_controller
                 }
             }
         }
+        
+        /// Ya que las retenciones y los pagos del modelo comparten la cuenta 473 se descuenta del total los pagos efectuados por el modelo para
+        /// dejar unicamente el valor de las retenciones.
+        
+        $this->casilla_6 -= $totalPagos;
 
         /// Obtenemos el valor de la casilla 7
 
