@@ -27,7 +27,7 @@ Rappels sobre compras:
 
 Retenciones:
     
-    4751
+    473
 
 En caso de querer incluir una cuenta no especificada arriba, se puede hacer uso de tres cuentas especiales para asignarla.
 
