@@ -37,7 +37,6 @@ M130G -> Gastos
 
 M130R -> Retenciones
 
-Actualmente se encuentra en fase de prueba por lo que uso o no de los datos obtenidos es responsabilidad exclusiva del usuario, cualquier sugerencia,
-mejora o consulta se podrá solicitar en el correspondiente apartado en la web de Facturascripts.
+Actualmente se encuentra en fase de prueba por lo que el uso de los datos obtenidos a través de este plugin es responsabilidad exclusiva del usuario, cualquier sugerencia, mejora o consulta se podrá solicitar en el correspondiente apartado en la web de Facturascripts.
 
 https://www.facturascripts.com
