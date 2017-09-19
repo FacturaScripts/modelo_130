@@ -11,11 +11,11 @@ Para el calculo se usan las siguientes cuentas:
 
 Ingresos:
 
-    700, 701, 702, 703, 704, 705, 752, 753, 754, 755, 759, 771 y 778
+    700, 701, 702, 703, 704, 705, 752, 753, 754, 755, 759, 770, 771 y 778
 
 Gastos:
 
-    600, 601, 602, 607, 621, 622, 623, 624, 625, 626, 627, 628, 629, 631, 640, 641, 642, 643, 644, 649, 669, 678, 680 y 681
+    600, 601, 602, 607, 621, 622, 623, 624, 625, 626, 627, 628, 629, 631, 640, 641, 642, 643, 644, 649, 669, 670, 671, 678, 680 y 681
        
 Rappels sobre ventas:
  
@@ -37,6 +37,7 @@ M130G -> Gastos
 
 M130R -> Retenciones
 
-Actualmente se encuentra en fase de prueba por lo que el uso de los datos obtenidos a través de este plugin es responsabilidad exclusiva del usuario, cualquier sugerencia, mejora o consulta se podrá solicitar en el correspondiente apartado en la web de Facturascripts.
+Actualmente se encuentra en fase de prueba por lo que uso o no de los datos obtenidos es responsabilidad exclusiva del usuario, cualquier sugerencia,
+mejora o consulta se podrá solicitar en el correspondiente apartado en la web de Facturascripts.
 
 https://www.facturascripts.com
