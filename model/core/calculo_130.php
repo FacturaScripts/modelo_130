@@ -1,9 +1,8 @@
 <?php
-
-/*
+/**
  * This file is part of modelo_130
- * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2017  Pablo Zerón Gea  pablozg@gmail.com
+ * Copyright (C) 2014-2019  Carlos Garcia Gomez <neorazorx@gmail.com>
+ * Copyright (C) 2017       Pablo Zerón Gea     <pablozg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -12,25 +11,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 namespace FacturaScripts\model;
-
-require_model('asiento.php');
-require_model('partida.php');
-require_model('subcuenta.php');
 
 /**
  * Calculo modelo 130.
  *
- * @author Carlos García Gómez <neorazorx@gmail.com>
- * @author Pablo Zerón Gea <pablozg@gmail.com>
- * Basado en
+ * @author Carlos García Gómez  <neorazorx@gmail.com>
+ * @author Pablo Zerón Gea      <pablozg@gmail.com>
  */
 class calculo_130 extends \fs_model
 {
@@ -155,27 +148,27 @@ class calculo_130 extends \fs_model
     {
         if (is_null($this->idmod130)) {
             return 'index.php?page=modelo_130';
-        } else {
-            return 'index.php?page=modelo_130&id=' . $this->idmod130;
         }
+
+        return 'index.php?page=modelo_130&id=' . $this->idmod130;
     }
 
     public function asiento_url()
     {
         if (is_null($this->idasiento)) {
             return 'index.php?page=contabilidad_asientos';
-        } else {
-            return 'index.php?page=contabilidad_asiento&id=' . $this->idasiento;
         }
+
+        return 'index.php?page=contabilidad_asiento&id=' . $this->idasiento;
     }
 
     public function ejercicio_url()
     {
         if (is_null($this->codejercicio)) {
             return 'index.php?page=contabilidad_ejercicios';
-        } else {
-            return 'index.php?page=contabilidad_ejercicio&cod=' . $this->codejercicio;
         }
+
+        return 'index.php?page=contabilidad_ejercicio&cod=' . $this->codejercicio;
     }
 
     public function get_partidas()
@@ -183,9 +176,9 @@ class calculo_130 extends \fs_model
         if (isset($this->idasiento)) {
             $partida = new \partida();
             return $partida->all_from_asiento($this->idasiento);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function get($id)
@@ -193,19 +186,19 @@ class calculo_130 extends \fs_model
         $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idmod130 = " . $this->var2str($id) . ";");
         if ($data) {
             return new \calculo_130($data[0]);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function exists()
     {
         if (is_null($this->idmod130)) {
             return false;
-        } else {
-            return $this->db->select("SELECT * FROM " . $this->table_name
-                            . " WHERE idmod130 = " . $this->var2str($this->idmod130) . ";");
         }
+
+        return $this->db->select("SELECT * FROM " . $this->table_name
+                . " WHERE idmod130 = " . $this->var2str($this->idmod130) . ";");
     }
 
     public function test()
@@ -217,81 +210,80 @@ class calculo_130 extends \fs_model
     {
         if ($this->exists()) {
             $sql = "UPDATE " . $this->table_name . " SET codejercicio = " . $this->var2str($this->codejercicio)
-                    . ", fechaasiento = " . $this->var2str($this->fechaasiento)
-                    . ", fechafin = " . $this->var2str($this->fechafin)
-                    . ", fechainicio = " . $this->var2str($this->fechainicio)
-                    . ", idasiento = " . $this->var2str($this->idasiento)
-                    . ", pagado = " . $this->var2str($this->pagado)
-                    . ", contabilizar = " . $this->var2str($this->contabilizar)
-                    . ", complementaria = " . $this->var2str($this->complementaria)
-                    . ", cerrado = " . $this->var2str($this->cerrado)
-                    . ", periodo = " . $this->var2str($this->periodo)
-                    . ", casilla_1 = " . $this->var2str($this->casilla_1)
-                    . ", casilla_2 = " . $this->var2str($this->casilla_2)
-                    . ", casilla_3 = " . $this->var2str($this->casilla_3)
-                    . ", casilla_4 = " . $this->var2str($this->casilla_4)
-                    . ", casilla_5 = " . $this->var2str($this->casilla_5)
-                    . ", casilla_6 = " . $this->var2str($this->casilla_6)
-                    . ", casilla_7 = " . $this->var2str($this->casilla_7)
-                    . ", casilla_8 = " . $this->var2str($this->casilla_8)
-                    . ", casilla_9 = " . $this->var2str($this->casilla_9)
-                    . ", casilla_10 = " . $this->var2str($this->casilla_10)
-                    . ", casilla_11 = " . $this->var2str($this->casilla_11)
-                    . ", casilla_12 = " . $this->var2str($this->casilla_12)
-                    . ", casilla_13 = " . $this->var2str($this->casilla_13)
-                    . ", casilla_14 = " . $this->var2str($this->casilla_14)
-                    . ", casilla_15 = " . $this->var2str($this->casilla_15)
-                    . ", casilla_16 = " . $this->var2str($this->casilla_16)
-                    . ", casilla_17 = " . $this->var2str($this->casilla_17)
-                    . ", casilla_18 = " . $this->var2str($this->casilla_18)
-                    . ", casilla_19 = " . $this->var2str($this->casilla_19)
-                    . ", importe_deduccion_c19 = " . $this->var2str($this->importe_deduccion_c19)
-                    . "  WHERE idmod130 = " . $this->var2str($this->idmod130) . ";";
+                . ", fechaasiento = " . $this->var2str($this->fechaasiento)
+                . ", fechafin = " . $this->var2str($this->fechafin)
+                . ", fechainicio = " . $this->var2str($this->fechainicio)
+                . ", idasiento = " . $this->var2str($this->idasiento)
+                . ", pagado = " . $this->var2str($this->pagado)
+                . ", contabilizar = " . $this->var2str($this->contabilizar)
+                . ", complementaria = " . $this->var2str($this->complementaria)
+                . ", cerrado = " . $this->var2str($this->cerrado)
+                . ", periodo = " . $this->var2str($this->periodo)
+                . ", casilla_1 = " . $this->var2str($this->casilla_1)
+                . ", casilla_2 = " . $this->var2str($this->casilla_2)
+                . ", casilla_3 = " . $this->var2str($this->casilla_3)
+                . ", casilla_4 = " . $this->var2str($this->casilla_4)
+                . ", casilla_5 = " . $this->var2str($this->casilla_5)
+                . ", casilla_6 = " . $this->var2str($this->casilla_6)
+                . ", casilla_7 = " . $this->var2str($this->casilla_7)
+                . ", casilla_8 = " . $this->var2str($this->casilla_8)
+                . ", casilla_9 = " . $this->var2str($this->casilla_9)
+                . ", casilla_10 = " . $this->var2str($this->casilla_10)
+                . ", casilla_11 = " . $this->var2str($this->casilla_11)
+                . ", casilla_12 = " . $this->var2str($this->casilla_12)
+                . ", casilla_13 = " . $this->var2str($this->casilla_13)
+                . ", casilla_14 = " . $this->var2str($this->casilla_14)
+                . ", casilla_15 = " . $this->var2str($this->casilla_15)
+                . ", casilla_16 = " . $this->var2str($this->casilla_16)
+                . ", casilla_17 = " . $this->var2str($this->casilla_17)
+                . ", casilla_18 = " . $this->var2str($this->casilla_18)
+                . ", casilla_19 = " . $this->var2str($this->casilla_19)
+                . ", importe_deduccion_c19 = " . $this->var2str($this->importe_deduccion_c19)
+                . "  WHERE idmod130 = " . $this->var2str($this->idmod130) . ";";
 
             return $this->db->exec($sql);
-        } else {
-            $sql = "INSERT INTO " . $this->table_name . " (codejercicio,fechaasiento,fechafin,fechainicio,idasiento,pagado,contabilizar,"
-                    . "complementaria, cerrado, periodo,casilla_1,casilla_2,casilla_3,casilla_4,casilla_5,casilla_6,casilla_7,casilla_8,casilla_9,"
-                    . "casilla_10,casilla_11,casilla_12,casilla_13,casilla_14,casilla_15,casilla_16,casilla_17,casilla_18,"
-                    . "casilla_19,importe_deduccion_c19) VALUES (" . $this->var2str($this->codejercicio)
-                    . "," . $this->var2str($this->fechaasiento)
-                    . "," . $this->var2str($this->fechafin)
-                    . "," . $this->var2str($this->fechainicio)
-                    . "," . $this->var2str($this->idasiento)
-                    . "," . $this->var2str($this->pagado)
-                    . "," . $this->var2str($this->contabilizar)
-                    . "," . $this->var2str($this->complementaria)
-                    . "," . $this->var2str($this->cerrado)
-                    . "," . $this->var2str($this->periodo)
-                    . "," . $this->var2str($this->casilla_1)
-                    . "," . $this->var2str($this->casilla_2)
-                    . "," . $this->var2str($this->casilla_3)
-                    . "," . $this->var2str($this->casilla_4)
-                    . "," . $this->var2str($this->casilla_5)
-                    . "," . $this->var2str($this->casilla_6)
-                    . "," . $this->var2str($this->casilla_7)
-                    . "," . $this->var2str($this->casilla_8)
-                    . "," . $this->var2str($this->casilla_9)
-                    . "," . $this->var2str($this->casilla_10)
-                    . "," . $this->var2str($this->casilla_11)
-                    . "," . $this->var2str($this->casilla_12)
-                    . "," . $this->var2str($this->casilla_13)
-                    . "," . $this->var2str($this->casilla_14)
-                    . "," . $this->var2str($this->casilla_15)
-                    . "," . $this->var2str($this->casilla_16)
-                    . "," . $this->var2str($this->casilla_17)
-                    . "," . $this->var2str($this->casilla_18)
-                    . "," . $this->var2str($this->casilla_19)
-                    . "," . $this->var2str($this->importe_deduccion_c19) . ");";
-
-            if ($this->db->exec($sql)) {
-                $this->idmod130 = $this->db->lastval();
-
-                return true;
-            } else {
-                return false;
-            }
         }
+
+        $sql = "INSERT INTO " . $this->table_name . " (codejercicio,fechaasiento,fechafin,fechainicio,idasiento,pagado,contabilizar,"
+            . "complementaria, cerrado, periodo,casilla_1,casilla_2,casilla_3,casilla_4,casilla_5,casilla_6,casilla_7,casilla_8,casilla_9,"
+            . "casilla_10,casilla_11,casilla_12,casilla_13,casilla_14,casilla_15,casilla_16,casilla_17,casilla_18,"
+            . "casilla_19,importe_deduccion_c19) VALUES (" . $this->var2str($this->codejercicio)
+            . "," . $this->var2str($this->fechaasiento)
+            . "," . $this->var2str($this->fechafin)
+            . "," . $this->var2str($this->fechainicio)
+            . "," . $this->var2str($this->idasiento)
+            . "," . $this->var2str($this->pagado)
+            . "," . $this->var2str($this->contabilizar)
+            . "," . $this->var2str($this->complementaria)
+            . "," . $this->var2str($this->cerrado)
+            . "," . $this->var2str($this->periodo)
+            . "," . $this->var2str($this->casilla_1)
+            . "," . $this->var2str($this->casilla_2)
+            . "," . $this->var2str($this->casilla_3)
+            . "," . $this->var2str($this->casilla_4)
+            . "," . $this->var2str($this->casilla_5)
+            . "," . $this->var2str($this->casilla_6)
+            . "," . $this->var2str($this->casilla_7)
+            . "," . $this->var2str($this->casilla_8)
+            . "," . $this->var2str($this->casilla_9)
+            . "," . $this->var2str($this->casilla_10)
+            . "," . $this->var2str($this->casilla_11)
+            . "," . $this->var2str($this->casilla_12)
+            . "," . $this->var2str($this->casilla_13)
+            . "," . $this->var2str($this->casilla_14)
+            . "," . $this->var2str($this->casilla_15)
+            . "," . $this->var2str($this->casilla_16)
+            . "," . $this->var2str($this->casilla_17)
+            . "," . $this->var2str($this->casilla_18)
+            . "," . $this->var2str($this->casilla_19)
+            . "," . $this->var2str($this->importe_deduccion_c19) . ");";
+
+        if ($this->db->exec($sql)) {
+            $this->idmod130 = $this->db->lastval();
+            return true;
+        }
+
+        return false;
     }
 
     public function update_mod130($campos, $valores, $id)
@@ -301,30 +293,28 @@ class calculo_130 extends \fs_model
         if ($this->exists()) {
             $encabezado = "UPDATE " . $this->table_name . " SET ";
             $cuerpo = '';
-
             foreach ($campos as $index => $data) {
                 $cuerpo = $cuerpo . $data . " = " . $this->var2str($valores[$index]) . ", ";
             }
 
             $cuerpo = substr_replace($cuerpo, '', -2, -1);
-
             $sql = $encabezado . $cuerpo . "  WHERE idmod130 = " . $this->var2str($id) . ";";
-
             if ($this->db->exec($sql)) {
                 return true;
-            } else {
-                return false;
             }
         }
+
+        return false;
     }
 
     public function last_row($codeejercicio = null)
     {
         if ($codeejercicio) {
-            $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codeejercicio = " . $this->var2str($this->codejercicio) ." AND idmod130 = (SELECT MAX(idmod130) FROM " . $this->table_name . ");");
+            $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codeejercicio = " . $this->var2str($this->codejercicio) . " AND idmod130 = (SELECT MAX(idmod130) FROM " . $this->table_name . ");");
         } else {
             $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idmod130=(SELECT MAX(idmod130) FROM " . $this->table_name . ");");
         }
+
         if ($data) {
             return $data[0]['idmod130'];
         }
@@ -333,7 +323,6 @@ class calculo_130 extends \fs_model
     public function delete()
     {
         if ($this->db->exec("DELETE FROM " . $this->table_name . " WHERE idmod130 = " . $this->var2str($this->idmod130) . ";")) {
-           
             /// si hay un asiento asociado lo eliminamos
             if (isset($this->idasiento)) {
                 $asiento = new \asiento();
@@ -344,9 +333,9 @@ class calculo_130 extends \fs_model
             }
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -376,7 +365,7 @@ class calculo_130 extends \fs_model
     {
         $reglist = array();
         $sql = "SELECT * FROM " . $this->table_name . " WHERE codejercicio = " . $this->var2str($codejercicio)
-                . " ORDER BY fechafin ASC;";
+            . " ORDER BY fechafin ASC;";
 
         $data = $this->db->select($sql);
         if ($data) {
@@ -409,7 +398,7 @@ class calculo_130 extends \fs_model
         $reglist = array();
 
         $sql = "SELECT * FROM " . $this->table_name . " WHERE fechafin < " . $this->var2str($fecha)
-                . " AND codejercicio = " . $this->var2str($codejercicio) . " ORDER BY fechafin ASC;";
+            . " AND codejercicio = " . $this->var2str($codejercicio) . " ORDER BY fechafin ASC;";
 
         $data = $this->db->select($sql);
         if ($data) {
@@ -420,27 +409,27 @@ class calculo_130 extends \fs_model
 
         return $reglist;
     }
-    
+
     /**
-    * Devuelve las cuentas del ejercicio $codeje cuya cuenta madre
-    * está marcada como cuenta especial $id.
-    * @param type $id
-    * @param type $codeje
-    * @return \subcuenta
-    */
-   public function all_from_cuenta_ejer($id, $codeje)
-   {
-       $cuentas = array();
-       $sql = "SELECT * FROM co_subcuentas WHERE codcuenta = ".$this->var2str($id)
-              ." AND codejercicio = ".$this->var2str($codeje)." ORDER BY codsubcuenta ASC;";
-      
-       $data = $this->db->select($sql);
-       if ($data) {
-           foreach ($data as $d) {
-               $cuentas[] = new \subcuenta($d);
-           }
-       }
-      
-       return $cuentas;
-   }
+     * Devuelve las cuentas del ejercicio $codeje cuya cuenta madre
+     * está marcada como cuenta especial $id.
+     * @param type $id
+     * @param type $codeje
+     * @return \subcuenta
+     */
+    public function all_from_cuenta_ejer($id, $codeje)
+    {
+        $cuentas = array();
+        $sql = "SELECT * FROM co_subcuentas WHERE codcuenta = " . $this->var2str($id)
+            . " AND codejercicio = " . $this->var2str($codeje) . " ORDER BY codsubcuenta ASC;";
+
+        $data = $this->db->select($sql);
+        if ($data) {
+            foreach ($data as $d) {
+                $cuentas[] = new \subcuenta($d);
+            }
+        }
+
+        return $cuentas;
+    }
 }

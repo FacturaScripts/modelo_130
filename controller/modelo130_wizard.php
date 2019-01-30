@@ -1,9 +1,8 @@
 <?php
-
-/*
+/**
  * This file is part of modelo_130
- * Copyright (C) 2017  Pablo Zerón Gea  pablozg@gmail.com
- * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2017       Pablo Zerón Gea     <pablozg@gmail.com>
+ * Copyright (C) 2014-2019  Carlos Garcia Gomez <neorazorx@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -12,15 +11,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-require_model('cuenta_especial.php');
-require_model('config_130.php');
 
 /**
  * Description of modelo130_wizard
@@ -31,6 +27,7 @@ require_model('config_130.php');
  */
 class modelo130_wizard extends fs_controller
 {
+
     public $cuenta_especial;
     public $configuracion;
 
@@ -41,12 +38,11 @@ class modelo130_wizard extends fs_controller
 
     protected function private_core()
     {
-
         /// ¿Hay errores? Usa informes > Errores
         if ($this->get_errors()) {
             $this->new_message('Puedes solucionar la mayoría de errores en la base de datos ejecutando el '
-                    . '<a href="index.php?page=informe_errores" target="_blank">informe de errores</a> '
-                    . 'sobre las tablas.');
+                . '<a href="index.php?page=informe_errores" target="_blank">informe de errores</a> '
+                . 'sobre las tablas.');
         }
 
         $this->cuenta_especial = new cuenta_especial();
@@ -67,8 +63,6 @@ class modelo130_wizard extends fs_controller
             }
         }
 
-
-
         /// Crea cuenta especial para gastos si no existe
         $cesp = $this->cuenta_especial->get('M130G');
         if (!$cesp) {
@@ -83,7 +77,6 @@ class modelo130_wizard extends fs_controller
                 $this->new_error_msg('Error al crear la cuenta especial (M130G).');
             }
         }
-
 
         /// Crea cuenta especial para las retenciones si no existe
         $cesp = $this->cuenta_especial->get('M130R');
@@ -101,7 +94,7 @@ class modelo130_wizard extends fs_controller
         }
 
         $this->check_menu();
-        
+
         header('Location: ' . $this->configuracion->url());
     }
 

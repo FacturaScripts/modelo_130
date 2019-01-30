@@ -1,8 +1,8 @@
 <?php
-
-/*
+/**
  * This file is part of modelo_130
- * Copyright (C) 2017 Pablo Zerón Gea pablozg@gmail.com
+ * Copyright (C) 2014-2019  Carlos Garcia Gomez <neorazorx@gmail.com>
+ * Copyright (C) 2017       Pablo Zerón Gea     <pablozg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -11,13 +11,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 namespace FacturaScripts\model;
 
 /**
@@ -73,18 +72,18 @@ class config_130 extends \fs_model
         $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codejercicio = " . $this->var2str($ejercicio) . ";");
         if ($data) {
             return new \config_130($data[0]);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function exists()
     {
         if (is_null($this->codejercicio)) {
             return false;
-        } else {
-            return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codejercicio = " . $this->var2str($this->codejercicio) . ";");
         }
+
+        return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codejercicio = " . $this->var2str($this->codejercicio) . ";");
     }
 
     public function test()
@@ -96,24 +95,24 @@ class config_130 extends \fs_model
     {
         if ($this->exists()) {
             $sql = "UPDATE " . $this->table_name . " SET hipoteca = " . $this->var2str($this->hipoteca)
-                    . ", descuento100 = " . $this->var2str($this->descuento100)
-                    . ", difjust = " . $this->var2str($this->difjust)
-                    . "  WHERE codejercicio = " . $this->var2str($this->codejercicio) . ";";
+                . ", descuento100 = " . $this->var2str($this->descuento100)
+                . ", difjust = " . $this->var2str($this->difjust)
+                . "  WHERE codejercicio = " . $this->var2str($this->codejercicio) . ";";
 
             return $this->db->exec($sql);
-        } else {
-            $sql = "INSERT INTO " . $this->table_name . " (codejercicio,hipoteca,descuento100,difjust) VALUES ("
-                    . $this->var2str($this->codejercicio)
-                    . "," . $this->var2str($this->hipoteca)
-                    . "," . $this->var2str($this->descuento100)
-                    . "," . $this->var2str($this->difjust) . ");";
-
-            if ($this->db->exec($sql)) {
-                return true;
-            } else {
-                return false;
-            }
         }
+
+        $sql = "INSERT INTO " . $this->table_name . " (codejercicio,hipoteca,descuento100,difjust) VALUES ("
+            . $this->var2str($this->codejercicio)
+            . "," . $this->var2str($this->hipoteca)
+            . "," . $this->var2str($this->descuento100)
+            . "," . $this->var2str($this->difjust) . ");";
+
+        if ($this->db->exec($sql)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function delete()

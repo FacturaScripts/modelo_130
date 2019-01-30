@@ -1,9 +1,8 @@
 <?php
-
-/*
+/**
  * This file is part of modelo_130
- * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2017  Pablo Zerón Gea pablozg@gmail.com
+ * Copyright (C) 2014-2019  Carlos Garcia Gomez <neorazorx@gmail.com>
+ * Copyright (C) 2017       Pablo Zerón Gea     <pablozg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -12,26 +11,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_model('asiento.php');
-require_model('ejercicio.php');
-require_model('factura_cliente.php');
-require_model('factura_proveedor.php');
-require_model('partida.php');
-require_model('calculo_130.php');
-require_model('subcuenta.php');
-require_model('cuenta_banco.php');
-require_model('cuenta.php');
-require_model('config_130.php');
-
+/**
+ * 
+ */
 class modelo_130 extends fs_controller
 {
+
     public $allow_delete;
     public $aux_mod130;
     public $factura_cli;
@@ -156,7 +148,6 @@ class modelo_130 extends fs_controller
             $this->descuento = $config->descuento100;
         }
 
-
         $this->s_mod130 = false;
         if (isset($_REQUEST['id'])) { // Si recibe el id se comprueba que hacer con él
             if (filter_input(INPUT_GET, 'pagado')) { // Si incluye el pagado se llama a la funcion del asiento de pago
@@ -232,7 +223,6 @@ class modelo_130 extends fs_controller
                 }
 
                 if ($continuar) {
-
                     // Si el trimestre que queremos borrar coincide con el último creado, se borra
                     if ($this->compruebaPeriodo($mod1300->codejercicio, $mod1300->periodo) == 2 and ! $mod1300->cerrado) {
                         if ($mod1300->delete()) {
@@ -265,8 +255,8 @@ class modelo_130 extends fs_controller
 
         /// facturas de compra
         $sql = "SELECT COUNT(*) as num FROM facturasprov WHERE idasiento IS NULL"
-                . " AND fecha >= " . $this->empresa->var2str($this->fecha_desde)
-                . " AND fecha <= " . $this->empresa->var2str($this->fecha_hasta) . ";";
+            . " AND fecha >= " . $this->empresa->var2str($this->fecha_desde)
+            . " AND fecha <= " . $this->empresa->var2str($this->fecha_hasta) . ";";
         $data = $this->db->select($sql);
         if ($data) {
             if (intval($data[0]['num']) > 0) {
@@ -276,8 +266,8 @@ class modelo_130 extends fs_controller
 
         /// facturas de venta
         $sql = "SELECT COUNT(*) as num FROM facturascli WHERE idasiento IS NULL"
-                . " AND fecha >= " . $this->empresa->var2str($this->fecha_desde)
-                . " AND fecha <= " . $this->empresa->var2str($this->fecha_hasta) . ";";
+            . " AND fecha >= " . $this->empresa->var2str($this->fecha_desde)
+            . " AND fecha <= " . $this->empresa->var2str($this->fecha_hasta) . ";";
         $data = $this->db->select($sql);
         if ($data) {
             if (intval($data[0]['num']) > 0) {
@@ -305,6 +295,7 @@ class modelo_130 extends fs_controller
             $this->calcula_resumen();
 
             if ($continuar) {
+                
             } else {
                 $this->template = false;
                 echo '<div class="alert alert-danger">Error al leer las subcuentas.</div>';
@@ -327,7 +318,7 @@ class modelo_130 extends fs_controller
                 // Si ya esta creado el trimestre no se continua
                 if ($this->mod130->all_from_ejercicio_periodo($eje0->codejercicio, filter_input(INPUT_POST, 'periodo'))) {
                     $this->new_error_msg('El modelo 130 correspondiente al periodo ' . filter_input(INPUT_POST, 'periodo') .
-                            ' ya ha sido creado, si deseea generar una declaración complementaria, entre dentro de la declaración y pulse el botón "Generar Complementaria".');
+                        ' ya ha sido creado, si deseea generar una declaración complementaria, entre dentro de la declaración y pulse el botón "Generar Complementaria".');
                     $continuar = false;
                 } else {
                     // Si el trimestre que queremos crear es posterior al último creado continuamos
@@ -343,7 +334,7 @@ class modelo_130 extends fs_controller
             } else {
                 if ($this->s_mod130->cerrado) {
                     $this->new_error_msg('Este trimestre se encuentra cerrado, si deseea generar una declaración complementaria de este periodo'
-                            . ', borre todos los trimestres posteriores.');
+                        . ', borre todos los trimestres posteriores.');
                     $continuar = false;
                 } else {
                     $this->fecha_hasta = $this->s_mod130->fechafin;
@@ -603,10 +594,10 @@ class modelo_130 extends fs_controller
                 }
             }
         }
-        
+
         /// Ya que las retenciones y los pagos del modelo comparten la cuenta 473 se descuenta del total los pagos efectuados por el modelo para
         /// dejar unicamente el valor de las retenciones.
-        
+
         $this->casilla_6 -= $totalPagos;
 
         /// Obtenemos el valor de la casilla 7

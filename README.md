@@ -40,4 +40,4 @@ M130R -> Retenciones
 Actualmente se encuentra en fase de prueba por lo que uso o no de los datos obtenidos es responsabilidad exclusiva del usuario, cualquier sugerencia,
 mejora o consulta se podrá solicitar en el correspondiente apartado en la web de Facturascripts.
 
-https://www.facturascripts.com
+https://www.facturascripts.com/plugin/modelo_130
